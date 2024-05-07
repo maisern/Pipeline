@@ -7,7 +7,7 @@ def klippepunkt(videoer):
     for line in h:  # går igjennom en og en linje
         if line.startswith('ï»¿'):
             line = line[3:]
-        kommando = "python ../TransNetV2/inference/transnetv2.py " + line
+        kommando = "python TransNetV2/inference/transnetv2.py " + line
         subprocess.run(kommando, shell=True)
 
 
