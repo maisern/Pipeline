@@ -7,16 +7,18 @@ def klippepunkt(videoer):
     for line in h:  # går igjennom en og en linje
         if line.startswith('ï»¿'):
             line = line[3:]
+        if line.endswith('\n'):
+            line = line[:-1]
         kommando = "python TransNetV2/inference/transnetv2.py " + line
         subprocess.run(kommando, shell=True)
 
 
 # Funksjon som konverterer klippepunktene i en video fra 'frames' til sekunder
 # Tar inn en liste med navn på alle filene med klippepunkter laget av TransNet
-def konvertere(liste):
-    filer = open(liste, "r")
+def konvertere(frames):
+    f = open(frames, "r")
     u = open("sekunder.txt", "w")
-    h = filer.readlines()
+    h = f.readlines()
     tall = ''
 
     for file in h:  # går igjennom en og en fil
@@ -46,7 +48,7 @@ def konvertere(liste):
         modified_file = modified_file[:-10] + 'predictions.txt'
         os.remove(modified_file)
 
-    filer.close()  # lukker filen
+    f.close()  # lukker filen
     u.close()
 
 
@@ -55,13 +57,14 @@ def lim(videoer, sekunder, tid):
     ut = open('vi.txt', 'w')  # Filen som skal brukes i ffmpeg
     vid = open(videoer, 'r')  # Listen med videoer
     f = open(sekunder, 'r')  # Klippepunkter i videoene
+    linjer = f.readlines()
 
     tidbrukt = 0
     i = -1
     # Oppretter filen som skal brukes i ffmpeg ved å gå igjennom listene og legge til de første
     # videoklippene fra hver video frem til tidsbegrensningen er nådd.
     while tidbrukt < tid:
-        for linje in f:
+        for linje in linjer:
             klippepunkter = linje.strip().split(',')  # Deler tidene opp til hvert element
             if i < (len(klippepunkter) - 2):  # Sjekker at det er igjen flere klipp
                 # Finner frem riktige klippepunkt
@@ -120,3 +123,8 @@ if __name__ == '__main__':
     konvertere('frames.txt')    # Gjør om klippepunktene fra frames til sekunder
 
     lim(videoer, 'sekunder.txt', tidsbegrensning)   # Limer sammen klippene frem til tidsbegrensningen er nådd
+
+    # sletter de midlertidige filene
+    os.remove("frames.txt")
+    os.remove("vi.txt")
+    os.remove("sekunder.txt")
